@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AsterMail API Documentation</title>
+    <style>
+        /* CSS will be added here */
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .tabs { margin-bottom: 20px; }
+        .tab-button { padding: 10px 20px; border: none; background: #f0f0f0; cursor: pointer; }
+        .tab-button.active { background: #ddd; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        form { max-width: 600px; }
+        label { display: block; margin-top: 10px; }
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 20px; padding: 10px 20px; }
+        #response { margin-top: 20px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>AsterMail API Documentation</h1>
+    <div class="tabs">
+        <button class="tab-button active" onclick="showTab('guide')">Guide</button>
+        <button class="tab-button" onclick="showTab('test')">Test</button>
+    </div>
+    <div id="guide" class="tab-content active">
+        <h2>API Guide</h2>
+        <p><strong>Base URL:</strong> <span id="baseUrl"></span></p>
+        <h3>Endpoints</h3>
+        <h4>POST /api/send</h4>
+        <p>Send an email using SMTP configuration.</p>
+        <h5>Request Body</h5>
+        <pre>{
+  "config": {
+    "host": "smtp.example.com",
+    "port": 587,
+    "secure": false,
+    "auth": {
+      "user": "your-email@example.com",
+      "pass": "your-password"
+    }
+  },
+  "data": {
+    "to": "recipient@example.com",
+    "subject": "Test Subject",
+    "html": "<p>Test HTML content</p>",
+    "autoresponse": {
+      "enabled": false,
+      "content": "Optional autoresponse content"
+    }
+  }
+}</pre>
+        <h5>Response</h5>
+        <p>Success: <code>{ "status": "success", "messageId": "..." }</code></p>
+        <p>Error: <code>{ "status": "error", "message": "..." }</code></p>
+        <h4>GET /health</h4>
+        <p>Health check endpoint.</p>
+        <p>Response: <code>{ "status": "ok" }</code></p>
+    </div>
+    <div id="test" class="tab-content">
+        <h2>Test API</h2>
+        <form id="testForm">
+            <h3>SMTP Configuration</h3>
+            <label>Host: <input type="text" name="config.host" required></label>
+            <label>Port: <input type="number" name="config.port" required></label>
+            <label>Secure: <input type="checkbox" name="config.secure"></label>
+            <label>User: <input type="email" name="config.auth.user" required></label>
+            <label>Password: <input type="password" name="config.auth.pass" required></label>
+            <h3>Email Data</h3>
+            <label>To: <input type="email" name="data.to" required></label>
+            <label>Subject: <input type="text" name="data.subject" required></label>
+            <label>HTML: <textarea name="data.html" rows="5" required></textarea></label>
+            <label>Autoresponse Enabled: <input type="checkbox" name="data.autoresponse.enabled"></label>
+            <label>Autoresponse Content: <textarea name="data.autoresponse.content" rows="3"></textarea></label>
+            <button type="submit">Send Email</button>
+        </form>
+        <div id="response"></div>
+    </div>
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                const keys = key.split('.');
+                let current = data;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    if (!current[keys[i]]) current[keys[i]] = {};
+                    current = current[keys[i]];
+                }
+                current[keys[keys.length - 1]] = value === 'on' ? true : value;
+            }
+            // Handle checkboxes properly
+            data.config.secure = formData.get('config.secure') === 'on';
+            data.data.autoresponse = {
+                enabled: formData.get('data.autoresponse.enabled') === 'on',
+                content: formData.get('data.autoresponse.content')
+            };
+            try {
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Set dynamic base URL
+        document.getElementById('baseUrl').textContent = window.location.origin;
+    </script>
+</body>
+</html>
