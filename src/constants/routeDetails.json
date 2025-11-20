@@ -1,0 +1,89 @@
+{
+  "api_documentation": {
+    "title": "AsterMail API",
+    "description": "Send emails programmatically with ease. Simple, reliable, and powerful.",
+    "version": "1.0.0",
+    "base_url": "",
+    "sections": [
+      {
+        "name": "Email Sending",
+        "description": "Core functionality for sending emails",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/api/send",
+            "description": "Send an email using SMTP configuration",
+            "parameters": {
+              "body": {
+                "config": {
+                  "host": "string (SMTP server address)",
+                  "port": "number (SMTP port)",
+                  "secure": "boolean (use SSL)",
+                  "auth": {
+                    "user": "string (email address)",
+                    "pass": "string (password or app password)"
+                  }
+                },
+                "data": {
+                  "to": "string (recipient email)",
+                  "subject": "string (email subject)",
+                  "html": "string (HTML content)",
+                  "autoresponse": {
+                    "enabled": "boolean",
+                    "content": "string (optional autoresponse content)"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Email sent successfully",
+                "example": {
+                  "status": "success",
+                  "messageId": "1234567890@example.com",
+                  "connectionActivity": "online",
+                  "statusCode": 200,
+                  "success": true,
+                  "message": "Request processed successfully"
+                }
+              },
+              "400": {
+                "description": "Validation error",
+                "example": {
+                  "status": "bad",
+                  "connectionActivity": "online",
+                  "statusCode": 400,
+                  "message": "Email Data is Missing to",
+                  "success": false
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Health Check",
+        "description": "Server health monitoring",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/health",
+            "description": "Check API health status",
+            "responses": {
+              "200": {
+                "description": "Server is healthy",
+                "example": {
+                  "status": "ok",
+                  "connectionActivity": "online",
+                  "statusCode": 200,
+                  "success": true,
+                  "message": "Request processed successfully"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
