@@ -9,13 +9,6 @@ import { homePage } from './pages/home';
 import { testPage } from './pages/test';
 
 const app = express();
-app.use((req, res, next) => {
-  // Force browser to use HTTP, not HTTPS
-  if (req.headers['x-forwarded-proto'] === 'https') {
-    return res.redirect('http://' + req.headers.host + req.url);
-  }
-  next();
-});
 
 app.use(helmet({
   contentSecurityPolicy: {
